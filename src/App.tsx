@@ -1,53 +1,52 @@
 import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
 
-const authorAvatar =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
-      <rect width="120" height="120" rx="60" fill="#E8E5DE"/>
-      <path d="M30 78C34 67 44 60 60 60C76 60 86 67 90 78" stroke="#6E7F6B" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="60" cy="48" r="16" stroke="#1A1A1A" stroke-width="4"/>
-    </svg>
-  `);
-
-const initialPortfolioImages = [
-  'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+// Elegant default SVG placeholder graphics so the page looks stunning before uploads
+const initialSvgAssets = {
+  hero: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
       <rect width="800" height="1000" rx="42" fill="#1A1A1A"/>
       <rect x="64" y="64" width="672" height="872" rx="38" fill="#5F665C"/>
       <circle cx="238" cy="282" r="140" fill="#FBFBFA" fill-opacity="0.16"/>
       <rect x="176" y="556" width="448" height="36" rx="18" fill="#FBFBFA" fill-opacity="0.54"/>
-      <rect x="176" y="616" width="278" height="20" rx="10" fill="#FBFBFA" fill-opacity="0.34"/>
-      <text x="176" y="744" fill="#FBFBFA" font-size="74" font-family="Inter, Arial, sans-serif" font-weight="700">Stacy</text>
+      <text x="176" y="744" fill="#FBFBFA" font-size="74" font-family="Arial, sans-serif" font-weight="700">Stacy</text>
     </svg>
   `),
-  'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
-      <rect width="800" height="1000" rx="42" fill="#F5F2EB"/>
-      <rect x="104" y="152" width="592" height="396" rx="28" fill="#1A1A1A"/>
-      <rect x="148" y="210" width="404" height="16" rx="8" fill="#FBFBFA" fill-opacity="0.54"/>
-      <rect x="148" y="246" width="260" height="12" rx="6" fill="#FBFBFA" fill-opacity="0.38"/>
-      <text x="148" y="434" fill="#FBFBFA" font-size="58" font-family="Playfair Display, Georgia, serif" font-weight="700">Brand studies</text>
-      <circle cx="596" cy="736" r="132" fill="#6E7F6B" fill-opacity="0.24"/>
+  left: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800">
+      <rect width="600" height="800" rx="32" fill="#F5F2EB"/>
+      <rect x="60" y="80" width="480" height="320" rx="20" fill="#1A1A1A"/>
+      <text x="80" y="460" fill="#1A1A1A" font-size="38" font-family="Georgia, serif" font-weight="700">Brand Studies</text>
     </svg>
   `),
-  'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
-      <rect width="800" height="1000" rx="42" fill="#FBFBFA"/>
-      <rect x="92" y="92" width="616" height="816" rx="38" fill="#1A1A1A"/>
-      <path d="M142 764C234 602 326 560 418 396c58-100 128-168 228-244" stroke="#F0D36D" stroke-width="28" stroke-linecap="round" fill="none"/>
-      <circle cx="534" cy="304" r="90" fill="#FBFBFA" fill-opacity="0.08"/>
+  rightTop: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300">
+      <rect width="600" height="300" rx="24" fill="#6E7F6B" fill-opacity="0.15"/>
+      <path d="M50 200C150 100 250 50 400 150" stroke="#6E7F6B" stroke-width="12" fill="none" stroke-linecap="round"/>
     </svg>
   `),
-  'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
-      <rect width="800" height="1000" rx="42" fill="#F8F6F1"/>
-      <rect x="78" y="78" width="644" height="844" rx="34" fill="#E7E0D0"/>
-      <rect x="140" y="140" width="520" height="56" rx="28" fill="#1A1A1A"/>
-      <rect x="140" y="272" width="520" height="470" rx="26" fill="#FBFBFA"/>
+  rightBottom: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+      <rect width="600" height="400" rx="24" fill="#EAE6DF"/>
+      <circle cx="450" cy="150" r="60" fill="#1A1A1A" fill-opacity="0.1"/>
     </svg>
   `),
-];
+  avatar: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
+      <rect width="120" height="120" rx="60" fill="#E8E5DE"/>
+      <circle cx="60" cy="48" r="16" stroke="#1A1A1A" stroke-width="4"/>
+      <path d="M30 82C35 70 45 62 60 62C75 62 85 70 90 82" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+  `),
+  circle1: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><circle cx="200" cy="200" r="180" fill="#E3DFD5"/></svg>
+  `),
+  circle2: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><circle cx="200" cy="200" r="180" fill="#D6D1C4"/></svg>
+  `),
+  circle3: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><circle cx="200" cy="200" r="180" fill="#C9C3B3"/></svg>
+  `),
+};
 
 function ReadingProgressBar() {
   const [progress, setProgress] = useState(0);
@@ -60,10 +59,8 @@ function ReadingProgressBar() {
       setProgress(Math.min(100, Math.max(0, nextProgress)));
     };
 
-    updateProgress();
     window.addEventListener('scroll', updateProgress, { passive: true });
     window.addEventListener('resize', updateProgress);
-
     return () => {
       window.removeEventListener('scroll', updateProgress);
       window.removeEventListener('resize', updateProgress);
@@ -71,197 +68,103 @@ function ReadingProgressBar() {
   }, []);
 
   return (
-    <div className="fixed left-0 top-0 z-50 h-px w-full bg-charcoal/10">
-      <div className="h-px origin-left bg-sage transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} aria-hidden="true" />
+    <div className="fixed left-0 top-0 z-50 h-[3px] w-full bg-zinc-200">
+      <div className="h-full bg-[#6E7F6B] transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} />
     </div>
   );
 }
 
-function LogoMark() {
-  return (
-    <a href="#top" className="group inline-flex items-center gap-3" aria-label="Stacy Designs home">
-      <svg className="h-16 w-16 shrink-0 drop-shadow-[0_10px_18px_rgba(26,26,26,0.18)] transition-all duration-300 group-hover:scale-105 sm:h-20 sm:w-20" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="goldStroke" x1="24" y1="18" x2="138" y2="142" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FFF1BB" />
-            <stop offset="16%" stopColor="#B58010" />
-            <stop offset="38%" stopColor="#F4DA6E" />
-            <stop offset="62%" stopColor="#855404" />
-            <stop offset="100%" stopColor="#F0D36D" />
-          </linearGradient>
-          <linearGradient id="shadowStroke" x1="20" y1="20" x2="140" y2="140" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#0D0D0D" />
-            <stop offset="100%" stopColor="#2A2A2A" />
-          </linearGradient>
-          <filter id="softGlow" x="0" y="0" width="160" height="160" filterUnits="userSpaceOnUse">
-            <feDropShadow dx="3" dy="6" stdDeviation="4" floodColor="#000000" floodOpacity="0.2" />
-          </filter>
-        </defs>
-        <g filter="url(#softGlow)">
-          <path d="M50 122c-9-8-14-19-14-31 0-24 15-39 39-39 13 0 23 5 30 13" stroke="url(#goldStroke)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M52 121c-9-8-14-19-14-31 0-24 15-39 39-39 13 0 23 5 30 13" stroke="url(#shadowStroke)" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M89 25 113 121" stroke="url(#goldStroke)" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M90 25 113 121" stroke="url(#shadowStroke)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M80 116 66 61 52 116" stroke="url(#goldStroke)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M80 116 66 61 52 116" stroke="url(#shadowStroke)" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M58 75h19" stroke="url(#goldStroke)" strokeWidth="10" strokeLinecap="round" />
-          <path d="M58 75h19" stroke="url(#shadowStroke)" strokeWidth="5.5" strokeLinecap="round" />
-          <path d="M30 124c15 7 42 10 88 5" stroke="url(#shadowStroke)" strokeWidth="8" strokeLinecap="round" opacity="0.55" />
-          <path d="M30 122c15 7 42 10 88 5" stroke="url(#goldStroke)" strokeWidth="5.8" strokeLinecap="round" opacity="0.85" />
-        </g>
-      </svg>
-      <span className="sr-only">Stacy Designs</span>
-    </a>
-  );
-}
+function Navbar({ logoUrl, onLogoUpload }: { logoUrl: string | null; onLogoUpload: (e: ChangeEvent<HTMLInputElement>) => void }) {
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
-function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-charcoal/5 bg-cream/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
-        <LogoMark />
-        <div className="hidden items-center gap-8 text-sm text-charcoal/65 md:flex">
-          <a className="transition-all duration-300 hover:text-sage" href="#article">Article</a>
-          <a className="transition-all duration-300 hover:text-sage" href="#highlights">Highlights</a>
-          <a className="transition-all duration-300 hover:text-sage" href="#notes">Notes</a>
+    <header className="sticky top-0 z-40 border-b border-zinc-200/50 bg-[#FBFBFA]/80 backdrop-blur-md">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12">
+        <div className="flex items-center gap-3">
+          <div 
+            onClick={() => logoInputRef.current?.click()}
+            className="h-10 w-10 overflow-hidden rounded-xl border border-zinc-300 bg-zinc-100 flex items-center justify-center cursor-pointer hover:border-[#6E7F6B] transition group relative"
+          >
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-xs font-serif font-bold text-zinc-400 group-hover:text-zinc-600">S</span>
+            )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[10px] text-white font-medium">Edit</div>
+          </div>
+          <input ref={logoInputRef} type="file" accept="image/*" className="sr-only" onChange={onLogoUpload} />
+          <span className="font-serif text-sm font-semibold tracking-tight text-zinc-800">Stacy Designs</span>
+        </div>
+        
+        <div className="hidden items-center gap-8 text-xs font-medium uppercase tracking-widest text-zinc-400 md:flex">
+          <a className="text-zinc-900 transition hover:text-[#6E7F6B]" href="#article">Article</a>
+          <a className="transition hover:text-[#6E7F6B]" href="#grid-editor">Layout Studio</a>
+          <a className="transition hover:text-[#6E7F6B]" href="#notes">Design Notes</a>
         </div>
       </nav>
     </header>
   );
 }
 
-function usePortfolioState() {
-  const [portfolioImages, setPortfolioImages] = useState<string[]>(initialPortfolioImages);
-  const [heroImageIndex, setHeroImageIndex] = useState(0);
-  const [instagramGridSlots, setInstagramGridSlots] = useState({ left: 1, rightTop: 2, rightBottom: 3 });
-  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
-
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return null;
-    }
-
-    const nextUrl = URL.createObjectURL(file);
-    let nextIndex = portfolioImages.length;
-
-    setPortfolioImages((current) => {
-      nextIndex = current.length;
-      return [...current, nextUrl];
-    });
-
-    event.target.value = '';
-    return nextIndex;
-  };
-
-  const handleSlotImageUpload = (slot: 'hero' | 'left' | 'rightTop' | 'rightBottom') => (event: ChangeEvent<HTMLInputElement>) => {
-    const nextIndex = handleImageUpload(event);
-    if (nextIndex == null) {
-      return;
-    }
-
-    if (slot === 'hero') {
-      setHeroImageIndex(nextIndex);
-      return;
-    }
-
-    setInstagramGridSlots((current) => ({ ...current, [slot]: nextIndex }));
-  };
-
-  const handleLogoUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    setLogoImageUrl(URL.createObjectURL(file));
-    event.target.value = '';
-  };
-
-  const removeLogoImage = () => setLogoImageUrl(null);
-
-  return {
-    portfolioImages,
-    heroImageIndex,
-    instagramGridSlots,
-    logoImageUrl,
-    handleSlotImageUpload,
-    handleLogoUpload,
-    removeLogoImage,
-  };
-}
-
 interface HeroProps {
-  portfolioImages: string[];
-  heroImageIndex: number;
-  handleSlotImageUpload: (slot: 'hero') => (event: ChangeEvent<HTMLInputElement>) => void;
-  logoImageUrl: string | null;
-  handleLogoUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+  heroUrl: string;
+  avatarUrl: string;
+  onHeroUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  onAvatarUpload: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Hero({ portfolioImages, heroImageIndex, handleSlotImageUpload, logoImageUrl, handleLogoUpload }: HeroProps) {
-  const heroImage = portfolioImages[heroImageIndex] ?? portfolioImages[0];
-  const heroInputRef = useRef<HTMLInputElement | null>(null);
-  const logoInputRef = useRef<HTMLInputElement | null>(null);
+function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload }: HeroProps) {
+  const heroInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14 lg:px-12 lg:py-24">
-      <div className="max-w-3xl">
-        <p className="mb-5 text-xs font-medium uppercase tracking-[0.35em] text-sage">Stacy Akinyi / Design Perspective</p>
-        <h1 className="font-serif text-5xl leading-[0.95] tracking-[-0.045em] text-charcoal sm:text-6xl lg:text-7xl">Stacy Designs: a refined visual language for modern creative work</h1>
-        <p className="mt-6 max-w-2xl text-base leading-8 text-charcoal/75 sm:text-lg">A measured interface can do more than display words. It can frame identity, present selected work, and turn a creative practice into something that feels unmistakably premium.</p>
+    <section className="mx-auto grid max-w-7xl gap-12 px-6 py-16 sm:px-12 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+      <div className="max-w-2xl justify-center flex flex-col">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-[#6E7F6B]">Stacy Akinyi / Design Perspective</p>
+        <h1 className="font-serif text-4xl leading-[1.05] tracking-tight text-zinc-900 sm:text-6xl">
+          Stacy Designs: a refined visual language for modern creative work
+        </h1>
+        <p className="mt-6 text-base leading-8 text-zinc-600 sm:text-lg">
+          A measured interface can do more than display words. It can frame identity, present selected work, and turn a creative practice into something that feels unmistakably premium.
+        </p>
 
-        <div className="mt-8 inline-flex flex-wrap items-center gap-4 rounded-full border border-charcoal/10 bg-white/55 px-4 py-3 shadow-[0_10px_30px_rgba(26,26,26,0.05)] backdrop-blur-sm">
-          <img src={authorAvatar} alt="Author avatar" className="h-12 w-12 rounded-full border border-charcoal/10" />
-          <div className="pr-4">
-            <p className="text-sm font-medium text-charcoal">Stacy Akinyi</p>
-            <p className="text-sm text-charcoal/65">Creative portfolio · Published July 2, 2026</p>
+        {/* Interactive Avatar Container */}
+        <div className="mt-8 inline-flex items-center gap-4 self-start rounded-full border border-zinc-200 bg-white/80 p-2 pr-6 shadow-sm backdrop-blur-sm">
+          <div 
+            onClick={() => avatarInputRef.current?.click()}
+            className="relative h-12 w-12 cursor-pointer overflow-hidden rounded-full border border-zinc-300 bg-zinc-100 group shadow-inner"
+          >
+            <img src={avatarUrl} alt="Stacy" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] text-white font-bold uppercase tracking-wider">Swap</div>
+          </div>
+          <input ref={avatarInputRef} type="file" accept="image/*" className="sr-only" onChange={onAvatarUpload} />
+          <div>
+            <p className="text-xs font-bold text-zinc-800">Stacy Akinyi</p>
+            <p className="text-[11px] text-zinc-400">Creative Portfolio · Published July 6, 2026</p>
           </div>
         </div>
       </div>
 
-      <div className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-charcoal/10 bg-[linear-gradient(135deg,rgba(26,26,26,0.94)_0%,rgba(43,43,43,0.9)_44%,rgba(110,127,107,0.82)_100%)] shadow-editorial sm:min-h-[30rem]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.14),transparent_18%)]" />
+      {/* Hero Canvas Artwork Target */}
+      <div 
+        onClick={() => heroInputRef.current?.click()}
+        className="relative min-h-[22rem] cursor-pointer overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-900 shadow-xl group sm:min-h-[28rem]"
+      >
+        <img src={heroUrl} alt="Featured Portfolio Artwork" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 opacity-60 group-hover:opacity-40 transition-opacity" />
         
-        {/* Dynamic Top-Left Circle (Logo Upload Slot) */}
-        <button
-          type="button"
-          onClick={() => logoInputRef.current?.click()}
-          className="group absolute left-6 top-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/5 transition-all duration-300 hover:bg-white/10 sm:left-8 sm:top-8 sm:h-32 sm:w-32"
-          aria-label="Upload custom logo asset"
-        >
-          {logoImageUrl ? (
-            <img src={logoImageUrl} alt="Stacy Custom Logo" className="h-full w-full object-cover" />
-          ) : (
-            <span className="text-xs uppercase tracking-wider text-white/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">Add Logo</span>
-          )}
-        </button>
-        <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="sr-only" aria-hidden="true" tabIndex={-1} />
-
-        <div className="absolute bottom-8 left-8 right-8 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 z-10 text-white">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-white/55">Creative direction / hero treatment</p>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-white/75">A premium space reserved for Stacy’s signature imagery, posters, styling studies, or campaign visuals.</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Hero Treatment</p>
+            <p className="mt-1 max-w-xs text-xs text-zinc-300 leading-relaxed">
+              Click anywhere on this canvas splash container to swap out your signature campaign banner.
+            </p>
           </div>
-
-          {/* Clean Profile Photo Trigger Wrapper */}
-          <button 
-            type="button"
-            onClick={() => heroInputRef.current?.click()}
-            className="group relative h-20 w-20 justify-self-end rounded-full border border-white/25 bg-white/10 backdrop-blur-sm sm:h-24 sm:w-24 overflow-visible"
-            aria-label="Upload or replace the hero image"
-          >
-            <img src={heroImage} alt="Hero image preview" className="h-full w-full rounded-full object-cover" />
-            <span className="absolute inset-0 rounded-full ring-1 ring-white/20 transition-all duration-300 group-hover:ring-white/50" />
-            
-            <div
-              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-charcoal/55 text-sm text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition-all duration-300 hover:bg-charcoal/75"
-            >
-              +
-            </div>
-          </button>
-          <input ref={heroInputRef} type="file" accept="image/*" onChange={handleSlotImageUpload('hero')} className="sr-only" aria-hidden="true" tabIndex={-1} />
+          <div className="shrink-0 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide backdrop-blur-md border border-white/10 group-hover:bg-white group-hover:text-zinc-900 transition duration-300">
+            Change Cover Art
+          </div>
         </div>
+        <input ref={heroInputRef} type="file" accept="image/*" className="sr-only" onChange={onHeroUpload} />
       </div>
     </section>
   );
@@ -269,175 +172,250 @@ function Hero({ portfolioImages, heroImageIndex, handleSlotImageUpload, logoImag
 
 function PullQuote({ children }: { children: ReactNode }) {
   return (
-    <blockquote className="my-14 flex gap-5 border-y border-charcoal/10 py-8 sm:py-10">
-      <span className="w-px shrink-0 bg-sage" aria-hidden="true" />
-      <p className="font-serif text-2xl italic leading-tight tracking-[-0.03em] text-charcoal sm:text-3xl">{children}</p>
+    <blockquote className="my-12 flex gap-6 border-y border-zinc-200 py-8">
+      <span className="w-1 shrink-0 bg-[#6E7F6B] rounded-full" />
+      <p className="font-serif text-xl italic leading-relaxed text-zinc-800 sm:text-2xl">{children}</p>
     </blockquote>
   );
 }
 
-function InlineFigure() {
+/* -------------------------------------------------------------------------- */
+/* ASYMMETRIC FLUID GRID BLOCK (Directly mapping image_c10046.png)     */
+/* -------------------------------------------------------------------------- */
+interface GridSlotProps {
+  image: string;
+  label: string;
+  aspectClass: string;
+  onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  onClear: () => void;
+}
+
+function GridSlot({ image, label, aspectClass, onUpload, onClear }: GridSlotProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isPlaceholder = image.startsWith('data:image/svg+xml');
+
   return (
-    <figure className="my-12 overflow-hidden rounded-[1.75rem] border border-charcoal/10 bg-white/70 shadow-[0_12px_40px_rgba(26,26,26,0.06)]">
-      <div className="grid min-h-[16rem] place-items-center bg-[linear-gradient(135deg,rgba(110,127,107,0.18),rgba(26,26,26,0.05))] p-8 sm:min-h-[20rem]">
-        <div className="grid w-full max-w-xl gap-4 sm:grid-cols-[0.95fr_1.05fr]">
-          <div className="h-44 rounded-[1.5rem] border border-white/70 bg-white/60 shadow-sm sm:h-52" />
-          <div className="grid gap-4">
-            <div className="h-20 rounded-[1.25rem] border border-white/70 bg-white/55" />
-            <div className="h-28 rounded-[1.25rem] border border-white/70 bg-white/50" />
-          </div>
+    <div 
+      onClick={() => fileInputRef.current?.click()}
+      className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/70 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer ${aspectClass}`}
+    >
+      <img src={image} alt={label} className={`h-full w-full ${isPlaceholder ? 'object-contain p-6 opacity-60' : 'object-cover'} transition-transform duration-500 group-hover:scale-[1.02]`} />
+      
+      {/* Dynamic Overlay Menu Controls */}
+      <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <span className="text-[10px] font-mono tracking-widest uppercase text-white/90 bg-black/30 px-2 py-0.5 rounded self-start backdrop-blur-xs">
+          {label}
+        </span>
+        <div className="flex gap-2 self-end">
+          <button 
+            type="button" 
+            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+            className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-900 shadow-sm transition transform hover:scale-105"
+          >
+            Swap File
+          </button>
+          {!isPlaceholder && (
+            <button 
+              type="button" 
+              onClick={(e) => { e.stopPropagation(); onClear(); }}
+              className="rounded-lg bg-red-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition transform hover:scale-105"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
-      <figcaption className="px-6 py-4 text-center text-sm italic text-charcoal/60 sm:px-8">This section is ready for Stacy’s real post imagery once the selected Instagram assets are shared.</figcaption>
-    </figure>
+
+      <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={onUpload} />
+    </div>
   );
 }
 
-function PortfolioCircle({ image, title, description, onUpload }: { image: string; title: string; description: string; onUpload: (event: ChangeEvent<HTMLInputElement>) => void }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+interface EditorialGridStudioProps {
+  assets: typeof initialSvgAssets;
+  updateAsset: (slot: keyof typeof initialSvgAssets, file: File | null) => void;
+}
+
+function EditorialGridStudio({ assets, updateAsset }: EditorialGridStudioProps) {
+  return (
+    <section id="grid-editor" className="my-16 rounded-[2rem] border border-zinc-200 bg-[#EFECE6]/50 p-6 sm:p-10 shadow-inner">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E7F6B]">Asymmetric Grid Engine</span>
+          <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">Live Grid Portfolio Mapper</h2>
+        </div>
+        <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">
+          Hover over any asset placeholder module inside the asymmetric tree grid below to dynamically update or clear custom images.
+        </p>
+      </div>
+
+      {/* Liquid Responsive Tree Mesh Layout */}
+      <div className="grid gap-4 sm:grid-cols-[1fr_1.1fr]">
+        {/* Tall Feature Left Column */}
+        <GridSlot 
+          image={assets.left} 
+          label="Feature Left Column" 
+          aspectClass="h-64 sm:h-[26rem]" 
+          onUpload={(e) => updateAsset('left', e.target.files?.[0] || null)}
+          onClear={() => updateAsset('left', null)}
+        />
+        
+        {/* Stacked Right Column Nest */}
+        <div className="grid gap-4">
+          <GridSlot 
+            image={assets.rightTop} 
+            label="Top Panel" 
+            aspectClass="h-32 sm:h-[12rem]" 
+            onUpload={(e) => updateAsset('rightTop', e.target.files?.[0] || null)}
+            onClear={() => updateAsset('rightTop', null)}
+          />
+          <GridSlot 
+            image={assets.rightBottom} 
+            label="Bottom Card Structure" 
+            aspectClass="h-44 sm:h-[13rem]" 
+            onUpload={(e) => updateAsset('rightBottom', e.target.files?.[0] || null)}
+            onClear={() => updateAsset('rightBottom', null)}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+interface CircleSlotProps {
+  image: string;
+  title: string;
+  onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+function CircleSlot({ image, title, onUpload }: CircleSlotProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isPlaceholder = image.startsWith('data:image/svg+xml');
 
   return (
-    <figure className="space-y-4 text-center">
-      <div className="group relative mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center overflow-hidden rounded-full border border-charcoal/10 bg-white/70 p-4 shadow-[0_16px_45px_rgba(26,26,26,0.08)] sm:max-w-[22rem]">
-        <img src={image} alt={title} className="h-full w-full rounded-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-        <div className="absolute inset-0 rounded-full ring-1 ring-white/30 transition-all duration-300 group-hover:ring-sage/35" />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-charcoal/10 bg-white/85 text-base text-charcoal shadow-[0_8px_20px_rgba(26,26,26,0.12)] transition-all duration-300 hover:bg-white"
-          aria-label={`Upload image for ${title}`}
-        >
-          +
-        </button>
-        <input ref={inputRef} type="file" accept="image/*" onChange={onUpload} className="sr-only" aria-hidden="true" tabIndex={-1} />
+    <div className="flex flex-col items-center text-center space-y-4">
+      <div 
+        onClick={() => inputRef.current?.click()}
+        className="group relative aspect-square w-full max-w-[14rem] cursor-pointer overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm transition hover:border-[#6E7F6B] hover:shadow-md"
+      >
+        <img src={image} alt={title} className={`h-full w-full rounded-full ${isPlaceholder ? 'p-4' : 'object-cover'}`} />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-full">
+          <span className="text-xs text-white font-medium tracking-wide">Upload Image</span>
+        </div>
+        <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={onUpload} />
       </div>
-      <figcaption className="mx-auto max-w-[18rem] text-sm italic leading-6 text-charcoal/60 sm:max-w-[22rem]">
-        <span className="block font-medium not-italic text-charcoal">{title}</span>
-        {description}
-      </figcaption>
-    </figure>
+      <div>
+        <h4 className="text-sm font-semibold text-zinc-800">{title}</h4>
+        <p className="text-xs text-zinc-400 mt-0.5">Circle crop mapping fallback module</p>
+      </div>
+    </div>
   );
 }
 
-function LogoBadge({ logoImageUrl, onLogoUpload, onRemoveLogo }: { logoImageUrl: string | null; onLogoUpload: (event: ChangeEvent<HTMLInputElement>) => void; onRemoveLogo: () => void }) {
-  const logoInputRef = useRef<HTMLInputElement | null>(null);
+export default function App() {
+  const [assets, setAssets] = useState(initialSvgAssets);
 
-  return (
-    <figure className="space-y-4 text-center">
-      <div className="group relative mx-auto flex aspect-square w-full max-w-[18rem] items-center justify-center overflow-hidden rounded-full border border-charcoal/10 bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f7f5f0_38%,#ece6d7_100%)] p-5 shadow-[0_16px_45px_rgba(26,26,26,0.08)] sm:max-w-[22rem]">
-        {logoImageUrl ? <img src={logoImageUrl} alt="Uploaded logo" className="h-full w-full rounded-full object-cover object-center" /> : <div className="flex h-full w-full items-center justify-center"><LogoMark /></div>}
-        <div className="absolute inset-0 rounded-full ring-1 ring-white/30 transition-all duration-300 group-hover:ring-sage/35" />
-        <button
-          type="button"
-          onClick={() => logoInputRef.current?.click()}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-charcoal/10 bg-white/90 text-base text-charcoal shadow-[0_8px_20px_rgba(26,26,26,0.12)] transition-all duration-300 hover:bg-white"
-          aria-label="Upload or replace the logo image"
-        >
-          +
-        </button>
-        <input ref={logoInputRef} type="file" accept="image/*" onChange={onLogoUpload} className="sr-only" aria-hidden="true" tabIndex={-1} />
-      </div>
-      <figcaption className="mx-auto max-w-[18rem] text-sm italic leading-6 text-charcoal/60 sm:max-w-[22rem]">
-        <span className="block font-medium not-italic text-charcoal">Logo</span>
-        Upload a logo image or keep the monogram fallback.
-      </figcaption>
-      <button type="button" onClick={onRemoveLogo} className="rounded-full border border-charcoal/10 px-4 py-2 text-sm text-charcoal transition-all duration-300 hover:border-sage hover:text-sage">Remove logo image</button>
-    </figure>
-  );
-}
+  // Helper utility to safely manage blob references and swap file slots
+  const updateAsset = (slot: keyof typeof initialSvgAssets, file: File | null) => {
+    if (!file) {
+      // Revert back to original initial fallback SVG asset
+      setAssets(prev => ({ ...prev, [slot]: initialSvgAssets[slot] }));
+      return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    setAssets(prev => {
+      // Clear old garbage collectable memory paths if necessary
+      if (prev[slot].startsWith('blob:')) URL.revokeObjectURL(prev[slot]);
+      return { ...prev, [slot]: localUrl };
+    });
+  };
 
-function App() {
-  const { portfolioImages, heroImageIndex, instagramGridSlots, logoImageUrl, handleSlotImageUpload, handleLogoUpload, removeLogoImage } = usePortfolioState();
-
+  // Clean memory garbage when app unmounts completely
   useEffect(() => {
     return () => {
-      portfolioImages.forEach((image) => {
-        if (image.startsWith('blob:')) {
-          URL.revokeObjectURL(image);
-        }
+      Object.values(assets).forEach(url => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
       });
-      if (logoImageUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(logoImageUrl);
-      }
     };
-  }, [portfolioImages, logoImageUrl]);
-
-  const heroImage = portfolioImages[heroImageIndex] ?? portfolioImages[0];
-  const gridLeft = portfolioImages[instagramGridSlots.left] ?? portfolioImages[0];
-  const gridRightTop = portfolioImages[instagramGridSlots.rightTop] ?? portfolioImages[0];
-  const gridRightBottom = portfolioImages[instagramGridSlots.rightBottom] ?? portfolioImages[0];
+  }, []);
 
   return (
-    <div id="top" className="min-h-screen bg-cream font-sans text-charcoal">
+    <div className="min-h-screen bg-[#FBFBFA] font-sans text-zinc-800 antialiased selection:bg-[#6E7F6B]/10 selection:text-[#6E7F6B]">
       <ReadingProgressBar />
-      <Navbar />
+      
+      <Navbar logoUrl={assets.circle1.startsWith('data:') ? null : assets.circle1} onLogoUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} />
+      
       <main>
+        {/* Full Interactive Hero Layer */}
         <Hero 
-          portfolioImages={portfolioImages} 
-          heroImageIndex={heroImageIndex} 
-          handleSlotImageUpload={handleSlotImageUpload} 
-          logoImageUrl={logoImageUrl}
-          handleLogoUpload={handleLogoUpload}
+          heroUrl={assets.hero} 
+          avatarUrl={assets.avatar} 
+          onHeroUpload={(e) => updateAsset('hero', e.target.files?.[0] || null)}
+          onAvatarUpload={(e) => updateAsset('avatar', e.target.files?.[0] || null)}
         />
 
-        <article id="article" className="mx-auto max-w-3xl px-5 pb-24 sm:px-8 lg:px-0">
-          <div className="mx-auto max-w-2xl">
-            <p className="mb-8 text-base leading-8 text-charcoal/80 sm:text-lg sm:leading-9 first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none first-letter:text-charcoal sm:first-letter:text-7xl">
+        {/* Elegant Original Long-Form Literary Prose Pillar Container */}
+        <article id="article" className="mx-auto max-w-3xl px-6 pb-24">
+          <div className="prose prose-zinc mx-auto max-w-2xl">
+            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9 first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none first-letter:text-zinc-900 sm:first-letter:text-7xl">
               Space is not absence. In a premium editorial interface, it is a structural material that guides rhythm, protects comprehension, and elevates every type choice into something ceremonial. The best digital stories feel edited, not merely arranged.
             </p>
 
-            <p className="mb-8 text-base leading-8 text-charcoal/80 sm:text-lg sm:leading-9">
+            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
               This composition keeps the reading column narrow enough to maintain a stable eye line while surrounding it with generous negative space. That margin is not wasted real estate; it is the buffer that allows Stacy’s name, work, and story to breathe with confidence.
             </p>
 
-            <PullQuote>Editorial luxury is often less about adding more and more about removing everything that does not deserve the reader’s attention.</PullQuote>
+            <PullQuote>
+              Editorial luxury is often less about adding more and more about removing everything that does not deserve the reader’s attention.
+            </PullQuote>
 
-            <p className="mb-8 text-base leading-8 text-charcoal/80 sm:text-lg sm:leading-9">
+            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
               The hierarchy stays disciplined. Serif headlines introduce tone and elegance, while the sans-serif body copy maintains clarity over long-form content. Micro-interactions are intentionally restrained, reserved for navigational states, progress indicators, and subtle link affordances.
             </p>
 
-            <InlineFigure />
+            {/* Complete Reintegrated Dynamic Asymmetric Multi-Grid Slot Tree Panel */}
+            <EditorialGridStudio assets={assets} updateAsset={updateAsset} />
 
-            <section className="my-16" id="highlights">
-              <div className="mb-6 flex items-end justify-between gap-6">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.35em] text-sage">Creative Portfolio</p>
-                  <h2 className="mt-2 font-serif text-3xl tracking-[-0.035em] text-charcoal sm:text-4xl">Selected work and identity mark</h2>
-                </div>
-                <p className="hidden max-w-xs text-sm leading-6 text-charcoal/60 sm:block">Upload files directly into the circles while keeping the editorial layout intact.</p>
-              </div>
-
-              <div className="grid gap-10 lg:grid-cols-2 lg:gap-12">
-                <PortfolioCircle image={heroImage} title="Hero treatment" description="Drop a new image onto this circle to replace the featured work." onUpload={handleSlotImageUpload('hero')} />
-                <LogoBadge logoImageUrl={logoImageUrl} onLogoUpload={handleLogoUpload} onRemoveLogo={removeLogoImage} />
-              </div>
-
-              <div className="mt-12 grid gap-4 md:grid-cols-3">
-                <PortfolioCircle image={gridLeft} title="Instagram grid left" description="Square-safe circle for the left grid slot." onUpload={handleSlotImageUpload('left')} />
-                <PortfolioCircle image={gridRightTop} title="Instagram grid top" description="Square-safe circle for the top-right slot." onUpload={handleSlotImageUpload('rightTop')} />
-                <PortfolioCircle image={gridRightBottom} title="Instagram grid bottom" description="Square-safe circle for the bottom-right slot." onUpload={handleSlotImageUpload('rightBottom')} />
-              </div>
-            </section>
-
-            <p className="mb-8 text-base leading-8 text-charcoal/80 sm:text-lg sm:leading-9">
+            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
               Every breakpoint preserves the same editorial logic. The hero graphic compresses gracefully, the nav remains calm and sticky, and the body content retains its cadence without collapsing into a generic blog template. That consistency is what makes the interface feel authored.
             </p>
 
-            <p className="text-base leading-8 text-charcoal/80 sm:text-lg sm:leading-9">The result is a single-page reading experience that feels premium, spatial, and precise, with a visual language that can support a designer’s article without competing with it.</p>
+            <p className="mb-16 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
+              The result is a single-page reading experience that feels premium, spatial, and precise, with a visual language that can support a designer’s article without competing with it.
+            </p>
+
+            {/* Bottom Secondary Grid Fallback Storage Circles Section */}
+            <section className="border-t border-zinc-200 pt-12">
+              <h3 className="font-serif text-xl font-bold mb-6 text-zinc-900">Alternative Profile Accents</h3>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <CircleSlot image={assets.circle1} title="Accent Target Alpha" onUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} />
+                <CircleSlot image={assets.circle2} title="Accent Target Beta" onUpload={(e) => updateAsset('circle2', e.target.files?.[0] || null)} />
+                <CircleSlot image={assets.circle3} title="Accent Target Gamma" onUpload={(e) => updateAsset('circle3', e.target.files?.[0] || null)} />
+              </div>
+            </section>
           </div>
 
-          <section id="notes" className="mx-auto mt-20 max-w-2xl rounded-[1.75rem] border border-charcoal/10 bg-white/55 p-6 shadow-[0_10px_40px_rgba(26,26,26,0.04)] sm:p-8">
-            <h2 className="font-serif text-2xl tracking-[-0.03em] text-charcoal">Design Notes</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-7 text-charcoal/70 sm:text-base">
-              <li>• The outer padding stays generous so the reading column feels curated instead of cramped.</li>
-              <li>• Accent color use is intentionally limited to progress, hover states, and the single-line quote treatment.</li>
-              <li>• Surfaces use soft borders and blur instead of heavy shadows to keep the page feeling airy.</li>
+          {/* Core Intact Design Notes Component */}
+          <section id="notes" className="mx-auto mt-20 max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
+            <h2 className="font-serif text-xl font-bold text-zinc-900 tracking-tight">Design Notes</h2>
+            <ul className="mt-4 space-y-3 text-xs leading-6 text-zinc-500 sm:text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-[#6E7F6B] font-bold">•</span>
+                The outer padding stays generous so the reading column feels curated instead of cramped.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#6E7F6B] font-bold">•</span>
+                Accent color use is intentionally limited to progress, hover states, and the single-line quote treatment.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#6E7F6B] font-bold">•</span>
+                Surfaces use soft borders and blur instead of heavy shadows to keep the page feeling airy.
+              </li>
             </ul>
           </section>
+
         </article>
       </main>
     </div>
   );
 }
-
-export default App;
