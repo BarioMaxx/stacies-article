@@ -1,7 +1,14 @@
+import { upload } from '@vercel/blob/client';
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
 
 // Elegant default SVG placeholder graphics so the page looks stunning before uploads
 const initialSvgAssets = {
+  logo: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="24" fill="#6E7F6B"/>
+      <text x="50" y="65" fill="#FBFBFA" font-size="42" font-family="Georgia, serif" font-weight="bold" text-anchor="middle">S</text>
+    </svg>
+  `),
   hero: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
       <rect width="800" height="1000" rx="42" fill="#1A1A1A"/>
@@ -74,7 +81,6 @@ function ReadingProgressBar() {
   );
 }
 
-// UPGRADED FOR PERMISSIONS: Pass isOwner and onAdminLogin down to Navbar
 function Navbar({ 
   logoUrl, 
   onLogoUpload, 
@@ -107,7 +113,6 @@ function Navbar({
           </div>
           <input ref={logoInputRef} type="file" accept="image/*" className="sr-only" onChange={onLogoUpload} />
           
-          {/* Secret Trigger: Clicking "Stacy Designs" opens the PIN login screen */}
           <span 
             onClick={onAdminLogin}
             className="font-serif text-sm font-semibold tracking-tight text-zinc-800 cursor-pointer select-none relative group"
@@ -135,7 +140,7 @@ interface HeroProps {
   avatarUrl: string;
   onHeroUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   onAvatarUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  isOwner: boolean; // UPGRADED FOR PERMISSIONS
+  isOwner: boolean;
 }
 
 function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload, isOwner }: HeroProps) {
@@ -153,7 +158,6 @@ function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload, isOwner }: Her
           A measured interface can do more than display words. It can frame identity, present selected work, and turn a creative practice into something that feels unmistakably premium.
         </p>
 
-        {/* Interactive Avatar Container */}
         <div className="mt-8 inline-flex items-center gap-4 self-start rounded-full border border-zinc-200 bg-white/80 p-2 pr-6 shadow-sm backdrop-blur-sm">
           <div 
             onClick={() => { if (isOwner) avatarInputRef.current?.click(); }}
@@ -167,19 +171,17 @@ function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload, isOwner }: Her
           <input ref={avatarInputRef} type="file" accept="image/*" className="sr-only" onChange={onAvatarUpload} />
           <div>
             <p className="text-xs font-bold text-zinc-800">Stacy Akinyi</p>
-            <p className="text-[11px] text-zinc-400">Creative Portfolio · Published July 6, 2026</p>
+            <p className="text-[11px] text-zinc-400">Creative Portfolio · Published July 2026</p>
           </div>
         </div>
       </div>
 
-      {/* Hero Canvas Artwork Target */}
       <div 
         onClick={() => { if (isOwner) heroInputRef.current?.click(); }}
         className={`relative min-h-[22rem] overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-900 shadow-xl sm:min-h-[28rem] ${isOwner ? 'cursor-pointer group' : 'cursor-default'}`}
       >
         <img src={heroUrl} alt="Featured Portfolio Artwork" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
         
-        {/* Only show editing controls if user is the Owner */}
         {isOwner ? (
           <>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 opacity-60 group-hover:opacity-40 transition-opacity" />
@@ -219,7 +221,7 @@ interface GridSlotProps {
   aspectClass: string;
   onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
-  isOwner: boolean; // UPGRADED FOR PERMISSIONS
+  isOwner: boolean;
 }
 
 function GridSlot({ image, label, aspectClass, onUpload, onClear, isOwner }: GridSlotProps) {
@@ -233,7 +235,6 @@ function GridSlot({ image, label, aspectClass, onUpload, onClear, isOwner }: Gri
     >
       <img src={image} alt={label} className={`h-full w-full ${isPlaceholder ? 'object-contain p-6 opacity-60' : 'object-cover'} transition-transform duration-500 group-hover:scale-[1.02]`} />
       
-      {/* Only show edit hover layer and buttons if user is the Owner */}
       {isOwner && (
         <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <span className="text-[10px] font-mono tracking-widest uppercase text-white/90 bg-black/30 px-2 py-0.5 rounded self-start backdrop-blur-xs">
@@ -268,7 +269,7 @@ function GridSlot({ image, label, aspectClass, onUpload, onClear, isOwner }: Gri
 interface EditorialGridStudioProps {
   assets: typeof initialSvgAssets;
   updateAsset: (slot: keyof typeof initialSvgAssets, file: File | null) => void;
-  isOwner: boolean; // UPGRADED FOR PERMISSIONS
+  isOwner: boolean;
 }
 
 function EditorialGridStudio({ assets, updateAsset, isOwner }: EditorialGridStudioProps) {
@@ -323,7 +324,7 @@ interface CircleSlotProps {
   image: string;
   title: string;
   onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  isOwner: boolean; // UPGRADED FOR PERMISSIONS
+  isOwner: boolean;
 }
 
 function CircleSlot({ image, title, onUpload, isOwner }: CircleSlotProps) {
@@ -346,23 +347,14 @@ function CircleSlot({ image, title, onUpload, isOwner }: CircleSlotProps) {
       </div>
       <div>
         <h4 className="text-sm font-semibold text-zinc-800">{title}</h4>
-        <p className="text-xs text-zinc-400 mt-0.5">Circle crop mapping fallback module</p>
+        <p className="text-xs text-zinc-400 mt-0.5">Circle crop mapping module</p>
       </div>
     </div>
   );
 }
 
 export default function App() {
-  // 1. Core State: Loads edited assets out of device browser memory
-  const [assets, setAssets] = useState<typeof initialSvgAssets>(() => {
-    const saved = localStorage.getItem('stacy_portfolio_assets');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return initialSvgAssets;
-  });
-
-  // 2. Permissions State: Defaults to false (client mode). Saved to local storage once unlocked.
+  const [assets, setAssets] = useState<typeof initialSvgAssets>(initialSvgAssets);
   const [isOwner, setIsOwner] = useState<boolean>(() => {
     return localStorage.getItem('stacy_admin_auth') === 'true';
   });
@@ -371,20 +363,48 @@ export default function App() {
   const [authPin, setAuthPin] = useState('');
   const [authMessage, setAuthMessage] = useState('');
 
-  // Keep the page anchored at the top when the app loads.
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
     window.scrollTo(0, 0);
+
+    const syncCloudAssets = async () => {
+      try {
+        const response = await fetch('/api/upload');
+        if (response.ok) {
+          const remoteMap = await response.json();
+          setAssets(prev => ({ ...prev, ...remoteMap }));
+        }
+      } catch (err) {
+        console.error("Unable to link global assets, using default SVGs:", err);
+      }
+    };
+    syncCloudAssets();
   }, []);
 
-  // Auto-sync image changes into local storage
-  useEffect(() => {
-    localStorage.setItem('stacy_portfolio_assets', JSON.stringify(assets));
-  }, [assets]);
+  const updateAsset = async (slot: keyof typeof initialSvgAssets, file: File | null) => {
+    if (!file) {
+      setAssets(prev => ({ ...prev, [slot]: initialSvgAssets[slot] }));
+      return;
+    }
 
-  // Handle PIN authentication logic
+    try {
+      const extension = file.name.split('.').pop();
+      const uniqueFilename = `portfolio/${slot}-${Date.now()}.${extension}`;
+      
+      const targetBlob = await upload(uniqueFilename, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      });
+      
+      setAssets(prev => ({ ...prev, [slot]: targetBlob.url }));
+    } catch (error) {
+      console.error("Vercel Storage transmission error:", error);
+      alert("Failed to pipe file upload into cloud storage.");
+    }
+  };
+
   const handleAdminLogin = () => {
     if (isOwner) {
       localStorage.removeItem('stacy_admin_auth');
@@ -400,153 +420,100 @@ export default function App() {
 
   const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (authPin === '2026') {
       localStorage.setItem('stacy_admin_auth', 'true');
       setIsOwner(true);
       setShowAuthDialog(false);
       setAuthPin('');
-      setAuthMessage('Access granted. Welcome back, Stacy!');
+      setAuthMessage('Access granted. Welcome back!');
     } else {
       setAuthMessage('Incorrect authorization code.');
     }
-  };
-
-  // Convert uploaded assets to permanent Base64 strings
-  const updateAsset = (slot: keyof typeof initialSvgAssets, file: File | null) => {
-    if (!file) {
-      setAssets(prev => ({ ...prev, [slot]: initialSvgAssets[slot] }));
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setAssets(prev => ({ ...prev, [slot]: base64String }));
-    };
-    reader.readAsDataURL(file);
   };
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] font-sans text-zinc-800 antialiased selection:bg-[#6E7F6B]/10 selection:text-[#6E7F6B]">
       <ReadingProgressBar />
       
-      {/* Navbar with active permission hooks */}
       <Navbar 
-        logoUrl={assets.circle1.startsWith('data:image/svg+xml') ? null : assets.circle1} 
-        onLogoUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} 
-        isOwner={isOwner}
-        onAdminLogin={handleAdminLogin}
+        logoUrl={assets.logo} 
+        onLogoUpload={(e) => updateAsset('logo', e.target.files?.[0] || null)} 
+        isOwner={isOwner} 
+        onAdminLogin={handleAdminLogin} 
       />
 
-      {showAuthDialog && !isOwner && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-6 pt-24 backdrop-blur-[2px]">
-          <form
-            onSubmit={handleAuthSubmit}
-            className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-[#FBFBFA] p-6 shadow-xl"
-          >
-            <h2 className="font-serif text-xl font-bold tracking-tight text-zinc-900">Owner Access</h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
-              Enter the editing PIN to unlock image uploads.
-            </p>
-            <input
-              autoFocus
-              type="password"
-              value={authPin}
-              onChange={(event) => setAuthPin(event.target.value)}
-              className="mt-4 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#6E7F6B]"
-              placeholder="PIN"
-            />
-            {authMessage && (
-              <p className="mt-3 text-sm text-zinc-500">{authMessage}</p>
-            )}
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAuthDialog(false)}
-                className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="rounded-xl bg-[#6E7F6B] px-4 py-2 text-sm font-medium text-white"
-              >
-                Unlock
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-      
       <main>
         <Hero 
           heroUrl={assets.hero} 
           avatarUrl={assets.avatar} 
-          onHeroUpload={(e) => updateAsset('hero', e.target.files?.[0] || null)}
-          onAvatarUpload={(e) => updateAsset('avatar', e.target.files?.[0] || null)}
-          isOwner={isOwner}
+          onHeroUpload={(e) => updateAsset('hero', e.target.files?.[0] || null)} 
+          onAvatarUpload={(e) => updateAsset('avatar', e.target.files?.[0] || null)} 
+          isOwner={isOwner} 
         />
 
-        <article id="article" className="mx-auto max-w-3xl px-6 pb-24">
-          <div className="prose prose-zinc mx-auto max-w-2xl">
-            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9 first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none first-letter:text-zinc-900 sm:first-letter:text-7xl">
-              Space is not absence. In a premium editorial interface, it is a structural material that guides rhythm, protects comprehension, and elevates every type choice into something ceremonial. The best digital stories feel edited, not merely arranged.
+        <article id="article" className="mx-auto max-w-3xl px-6 py-12 sm:px-12">
+          <div className="prose prose-zinc lg:prose-lg text-zinc-700 leading-relaxed space-y-6">
+            <p>
+              Design isn't merely decoration; it is an organizational logic. When content flows into layout structures organically, the boundaries between the canvas container and the artistic composition dissolve.
             </p>
-
-            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
-              This composition keeps the reading column narrow enough to maintain a stable eye line while surrounding it with generous negative space. That margin is not wasted real estate; it is the buffer that allows Stacy’s name, work, and story to breathe with confidence.
-            </p>
-
+            
             <PullQuote>
-              Editorial luxury is often less about adding more and more about removing everything that does not deserve the reader’s attention.
+              "Simplicity is not the lack of clutter, but the presence of clarity."
             </PullQuote>
 
-            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
-              The hierarchy stays disciplined. Serif headlines introduce tone and elegance, while the sans-serif body copy maintains clarity over long-form content. Micro-interactions are intentionally restrained, reserved for navigational states, progress indicators, and subtle link affordances.
+            <p>
+              By leveraging cloud infrastructure alongside asynchronous asset streaming, interfaces achieve continuous execution states without sacrificing typographic weight or design balance.
             </p>
-
-            {/* Asymmetric Studio with layout blocking control */}
-            <EditorialGridStudio assets={assets} updateAsset={updateAsset} isOwner={isOwner} />
-
-            <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
-              Every breakpoint preserves the same editorial logic. The hero graphic compresses gracefully, the nav remains calm and sticky, and the body content retains its cadence without collapsing into a generic blog template. That consistency is what makes the interface feel authored.
-            </p>
-
-            <p className="mb-16 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
-              The result is a single-page reading experience that feels premium, spatial, and precise, with a visual language that can support a designer’s article without competing with it.
-            </p>
-
-            {/* Accent Profile Submodules */}
-            <section className="border-t border-zinc-200 pt-12">
-              <h3 className="font-serif text-xl font-bold mb-6 text-zinc-900">Alternative Profile Accents</h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <CircleSlot image={assets.circle1} title="Accent Target Alpha" onUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} isOwner={isOwner} />
-                <CircleSlot image={assets.circle2} title="Accent Target Beta" onUpload={(e) => updateAsset('circle2', e.target.files?.[0] || null)} isOwner={isOwner} />
-                <CircleSlot image={assets.circle3} title="Accent Target Gamma" onUpload={(e) => updateAsset('circle3', e.target.files?.[0] || null)} isOwner={isOwner} />
-              </div>
-            </section>
           </div>
 
-          <section id="notes" className="mx-auto mt-20 max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
-            <h2 className="font-serif text-xl font-bold text-zinc-900 tracking-tight">Design Notes</h2>
-            <ul className="mt-4 space-y-3 text-xs leading-6 text-zinc-500 sm:text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-[#6E7F6B] font-bold">•</span>
-                The outer padding stays generous so the reading column feels curated instead of cramped.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#6E7F6B] font-bold">•</span>
-                Accent color use is intentionally limited to progress, hover states, and the single-line quote treatment.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#6E7F6B] font-bold">•</span>
-                Surfaces use soft borders and blur instead of heavy shadows to keep the page feeling airy.
-              </li>
-            </ul>
-          </section>
+          <EditorialGridStudio assets={assets} updateAsset={updateAsset} isOwner={isOwner} />
 
+          <section id="notes" className="my-16 border-t border-zinc-200 pt-12">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 block mb-6">Secondary Media Array</span>
+            <div className="grid gap-8 sm:grid-cols-3">
+              <CircleSlot image={assets.circle1} title="Identity Mapping" onUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} isOwner={isOwner} />
+              <CircleSlot image={assets.circle2} title="Structure & Space" onUpload={(e) => updateAsset('circle2', e.target.files?.[0] || null)} isOwner={isOwner} />
+              <CircleSlot image={assets.circle3} title="Minimal Gestures" onUpload={(e) => updateAsset('circle3', e.target.files?.[0] || null)} isOwner={isOwner} />
+            </div>
+          </section>
         </article>
       </main>
+
+      {/* Status Alert Overlay Toast */}
+      {authMessage && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-zinc-900 px-4 py-3 text-xs text-white shadow-xl max-w-sm animate-fade-in border border-zinc-800">
+          {authMessage}
+        </div>
+      )}
+
+      {/* Admin Credentials Pin Screen Overlay */}
+      {showAuthDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl">
+            <h3 className="font-serif text-lg font-bold text-zinc-900">Authorize Owner Access</h3>
+            <p className="mt-1 text-xs text-zinc-400">Please enter your system PIN configuration sequence to unlock editing privileges.</p>
+            
+            <form onSubmit={handleAuthSubmit} className="mt-4 space-y-4">
+              <input 
+                type="password" 
+                placeholder="••••" 
+                value={authPin} 
+                onChange={(e) => setAuthPin(e.target.value)} 
+                className="w-full rounded-xl border border-zinc-300 px-4 py-2 text-center text-sm font-bold tracking-widest text-zinc-800 outline-none focus:border-[#6E7F6B] focus:ring-1 focus:ring-[#6E7F6B]" 
+                autoFocus 
+              />
+              <div className="flex gap-2 justify-end text-xs font-semibold">
+                <button type="button" onClick={() => setShowAuthDialog(false)} className="rounded-lg px-3 py-2 text-zinc-500 hover:bg-zinc-100 transition">
+                  Cancel
+                </button>
+                <button type="submit" className="rounded-lg bg-[#6E7F6B] px-4 py-2 text-white hover:bg-[#5C6B59] shadow-sm transition">
+                  Unlock
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
