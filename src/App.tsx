@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
 
 // Elegant default SVG placeholder graphics so the page looks stunning before uploads
 const initialSvgAssets = {
@@ -74,7 +74,18 @@ function ReadingProgressBar() {
   );
 }
 
-function Navbar({ logoUrl, onLogoUpload }: { logoUrl: string | null; onLogoUpload: (e: ChangeEvent<HTMLInputElement>) => void }) {
+// UPGRADED FOR PERMISSIONS: Pass isOwner and onAdminLogin down to Navbar
+function Navbar({ 
+  logoUrl, 
+  onLogoUpload, 
+  isOwner, 
+  onAdminLogin 
+}: { 
+  logoUrl: string | null; 
+  onLogoUpload: (e: ChangeEvent<HTMLInputElement>) => void; 
+  isOwner: boolean; 
+  onAdminLogin: () => void 
+}) {
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -82,18 +93,31 @@ function Navbar({ logoUrl, onLogoUpload }: { logoUrl: string | null; onLogoUploa
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12">
         <div className="flex items-center gap-3">
           <div 
-            onClick={() => logoInputRef.current?.click()}
-            className="h-10 w-10 overflow-hidden rounded-xl border border-zinc-300 bg-zinc-100 flex items-center justify-center cursor-pointer hover:border-[#6E7F6B] transition group relative"
+            onClick={() => { if (isOwner) logoInputRef.current?.click(); }}
+            className={`h-10 w-10 overflow-hidden rounded-xl border border-zinc-300 bg-zinc-100 flex items-center justify-center relative ${isOwner ? 'cursor-pointer hover:border-[#6E7F6B] transition group' : 'cursor-default'}`}
           >
             {logoUrl ? (
               <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
             ) : (
-              <span className="text-xs font-serif font-bold text-zinc-400 group-hover:text-zinc-600">S</span>
+              <span className="text-xs font-serif font-bold text-zinc-400">S</span>
             )}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[10px] text-white font-medium">Edit</div>
+            {isOwner && (
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[10px] text-white font-medium">Edit</div>
+            )}
           </div>
           <input ref={logoInputRef} type="file" accept="image/*" className="sr-only" onChange={onLogoUpload} />
-          <span className="font-serif text-sm font-semibold tracking-tight text-zinc-800">Stacy Designs</span>
+          
+          {/* Secret Trigger: Clicking "Stacy Designs" opens the PIN login screen */}
+          <span 
+            onClick={onAdminLogin}
+            className="font-serif text-sm font-semibold tracking-tight text-zinc-800 cursor-pointer select-none relative group"
+            title="Click to toggle Admin Mode"
+          >
+            Stacy Designs
+            {isOwner && (
+              <span className="ml-2 rounded bg-[#6E7F6B] px-1.5 py-0.5 text-[9px] text-white uppercase font-sans font-bold tracking-wider">Owner Mode</span>
+            )}
+          </span>
         </div>
         
         <div className="hidden items-center gap-8 text-xs font-medium uppercase tracking-widest text-zinc-400 md:flex">
@@ -111,9 +135,10 @@ interface HeroProps {
   avatarUrl: string;
   onHeroUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   onAvatarUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  isOwner: boolean; // UPGRADED FOR PERMISSIONS
 }
 
-function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload }: HeroProps) {
+function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload, isOwner }: HeroProps) {
   const heroInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -131,11 +156,13 @@ function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload }: HeroProps) {
         {/* Interactive Avatar Container */}
         <div className="mt-8 inline-flex items-center gap-4 self-start rounded-full border border-zinc-200 bg-white/80 p-2 pr-6 shadow-sm backdrop-blur-sm">
           <div 
-            onClick={() => avatarInputRef.current?.click()}
-            className="relative h-12 w-12 cursor-pointer overflow-hidden rounded-full border border-zinc-300 bg-zinc-100 group shadow-inner"
+            onClick={() => { if (isOwner) avatarInputRef.current?.click(); }}
+            className={`relative h-12 w-12 overflow-hidden rounded-full border border-zinc-300 bg-zinc-100 shadow-inner ${isOwner ? 'cursor-pointer group' : 'cursor-default'}`}
           >
             <img src={avatarUrl} alt="Stacy" className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] text-white font-bold uppercase tracking-wider">Swap</div>
+            {isOwner && (
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[9px] text-white font-bold uppercase tracking-wider">Swap</div>
+            )}
           </div>
           <input ref={avatarInputRef} type="file" accept="image/*" className="sr-only" onChange={onAvatarUpload} />
           <div>
@@ -147,23 +174,30 @@ function Hero({ heroUrl, avatarUrl, onHeroUpload, onAvatarUpload }: HeroProps) {
 
       {/* Hero Canvas Artwork Target */}
       <div 
-        onClick={() => heroInputRef.current?.click()}
-        className="relative min-h-[22rem] cursor-pointer overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-900 shadow-xl group sm:min-h-[28rem]"
+        onClick={() => { if (isOwner) heroInputRef.current?.click(); }}
+        className={`relative min-h-[22rem] overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-900 shadow-xl sm:min-h-[28rem] ${isOwner ? 'cursor-pointer group' : 'cursor-default'}`}
       >
         <img src={heroUrl} alt="Featured Portfolio Artwork" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 opacity-60 group-hover:opacity-40 transition-opacity" />
         
-        <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 z-10 text-white">
-          <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Hero Treatment</p>
-            <p className="mt-1 max-w-xs text-xs text-zinc-300 leading-relaxed">
-              Click anywhere on this canvas splash container to swap out your signature campaign banner.
-            </p>
-          </div>
-          <div className="shrink-0 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide backdrop-blur-md border border-white/10 group-hover:bg-white group-hover:text-zinc-900 transition duration-300">
-            Change Cover Art
-          </div>
-        </div>
+        {/* Only show editing controls if user is the Owner */}
+        {isOwner ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10 opacity-60 group-hover:opacity-40 transition-opacity" />
+            <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 z-10 text-white">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Hero Treatment</p>
+                <p className="mt-1 max-w-xs text-xs text-zinc-300 leading-relaxed">
+                  Click anywhere on this canvas splash container to swap out your signature campaign banner.
+                </p>
+              </div>
+              <div className="shrink-0 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide backdrop-blur-md border border-white/10 group-hover:bg-white group-hover:text-zinc-900 transition duration-300">
+                Change Cover Art
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-40" />
+        )}
         <input ref={heroInputRef} type="file" accept="image/*" className="sr-only" onChange={onHeroUpload} />
       </div>
     </section>
@@ -179,52 +213,52 @@ function PullQuote({ children }: { children: ReactNode }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* ASYMMETRIC FLUID GRID BLOCK (Directly mapping image_c10046.png)     */
-/* -------------------------------------------------------------------------- */
 interface GridSlotProps {
   image: string;
   label: string;
   aspectClass: string;
   onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
+  isOwner: boolean; // UPGRADED FOR PERMISSIONS
 }
 
-function GridSlot({ image, label, aspectClass, onUpload, onClear }: GridSlotProps) {
+function GridSlot({ image, label, aspectClass, onUpload, onClear, isOwner }: GridSlotProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isPlaceholder = image.startsWith('data:image/svg+xml');
 
   return (
     <div 
-      onClick={() => fileInputRef.current?.click()}
-      className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/70 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer ${aspectClass}`}
+      onClick={() => { if (isOwner) fileInputRef.current?.click(); }}
+      className={`relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/70 shadow-sm transition-all duration-300 hover:shadow-md ${aspectClass} ${isOwner ? 'cursor-pointer group' : 'cursor-default'}`}
     >
       <img src={image} alt={label} className={`h-full w-full ${isPlaceholder ? 'object-contain p-6 opacity-60' : 'object-cover'} transition-transform duration-500 group-hover:scale-[1.02]`} />
       
-      {/* Dynamic Overlay Menu Controls */}
-      <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <span className="text-[10px] font-mono tracking-widest uppercase text-white/90 bg-black/30 px-2 py-0.5 rounded self-start backdrop-blur-xs">
-          {label}
-        </span>
-        <div className="flex gap-2 self-end">
-          <button 
-            type="button" 
-            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-            className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-900 shadow-sm transition transform hover:scale-105"
-          >
-            Swap File
-          </button>
-          {!isPlaceholder && (
+      {/* Only show edit hover layer and buttons if user is the Owner */}
+      {isOwner && (
+        <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <span className="text-[10px] font-mono tracking-widest uppercase text-white/90 bg-black/30 px-2 py-0.5 rounded self-start backdrop-blur-xs">
+            {label}
+          </span>
+          <div className="flex gap-2 self-end">
             <button 
               type="button" 
-              onClick={(e) => { e.stopPropagation(); onClear(); }}
-              className="rounded-lg bg-red-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition transform hover:scale-105"
+              onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+              className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-900 shadow-sm transition transform hover:scale-105"
             >
-              Clear
+              Swap File
             </button>
-          )}
+            {!isPlaceholder && (
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); onClear(); }}
+                className="rounded-lg bg-red-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition transform hover:scale-105"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={onUpload} />
     </div>
@@ -234,9 +268,10 @@ function GridSlot({ image, label, aspectClass, onUpload, onClear }: GridSlotProp
 interface EditorialGridStudioProps {
   assets: typeof initialSvgAssets;
   updateAsset: (slot: keyof typeof initialSvgAssets, file: File | null) => void;
+  isOwner: boolean; // UPGRADED FOR PERMISSIONS
 }
 
-function EditorialGridStudio({ assets, updateAsset }: EditorialGridStudioProps) {
+function EditorialGridStudio({ assets, updateAsset, isOwner }: EditorialGridStudioProps) {
   return (
     <section id="grid-editor" className="my-16 rounded-[2rem] border border-zinc-200 bg-[#EFECE6]/50 p-6 sm:p-10 shadow-inner">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -244,23 +279,23 @@ function EditorialGridStudio({ assets, updateAsset }: EditorialGridStudioProps) 
           <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E7F6B]">Asymmetric Grid Engine</span>
           <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">Live Grid Portfolio Mapper</h2>
         </div>
-        <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">
-          Hover over any asset placeholder module inside the asymmetric tree grid below to dynamically update or clear custom images.
-        </p>
+        {isOwner && (
+          <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">
+            Hover over any asset placeholder module inside the asymmetric tree grid below to dynamically update or clear custom images.
+          </p>
+        )}
       </div>
 
-      {/* Liquid Responsive Tree Mesh Layout */}
       <div className="grid gap-4 sm:grid-cols-[1fr_1.1fr]">
-        {/* Tall Feature Left Column */}
         <GridSlot 
           image={assets.left} 
           label="Feature Left Column" 
           aspectClass="h-64 sm:h-[26rem]" 
           onUpload={(e) => updateAsset('left', e.target.files?.[0] || null)}
           onClear={() => updateAsset('left', null)}
+          isOwner={isOwner}
         />
         
-        {/* Stacked Right Column Nest */}
         <div className="grid gap-4">
           <GridSlot 
             image={assets.rightTop} 
@@ -268,6 +303,7 @@ function EditorialGridStudio({ assets, updateAsset }: EditorialGridStudioProps) 
             aspectClass="h-32 sm:h-[12rem]" 
             onUpload={(e) => updateAsset('rightTop', e.target.files?.[0] || null)}
             onClear={() => updateAsset('rightTop', null)}
+            isOwner={isOwner}
           />
           <GridSlot 
             image={assets.rightBottom} 
@@ -275,6 +311,7 @@ function EditorialGridStudio({ assets, updateAsset }: EditorialGridStudioProps) 
             aspectClass="h-44 sm:h-[13rem]" 
             onUpload={(e) => updateAsset('rightBottom', e.target.files?.[0] || null)}
             onClear={() => updateAsset('rightBottom', null)}
+            isOwner={isOwner}
           />
         </div>
       </div>
@@ -286,22 +323,25 @@ interface CircleSlotProps {
   image: string;
   title: string;
   onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  isOwner: boolean; // UPGRADED FOR PERMISSIONS
 }
 
-function CircleSlot({ image, title, onUpload }: CircleSlotProps) {
+function CircleSlot({ image, title, onUpload, isOwner }: CircleSlotProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const isPlaceholder = image.startsWith('data:image/svg+xml');
 
   return (
     <div className="flex flex-col items-center text-center space-y-4">
       <div 
-        onClick={() => inputRef.current?.click()}
-        className="group relative aspect-square w-full max-w-[14rem] cursor-pointer overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm transition hover:border-[#6E7F6B] hover:shadow-md"
+        onClick={() => { if (isOwner) inputRef.current?.click(); }}
+        className={`relative aspect-square w-full max-w-[14rem] overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm transition ${isOwner ? 'cursor-pointer group hover:border-[#6E7F6B] hover:shadow-md' : 'cursor-default'}`}
       >
         <img src={image} alt={title} className={`h-full w-full rounded-full ${isPlaceholder ? 'p-4' : 'object-cover'}`} />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-full">
-          <span className="text-xs text-white font-medium tracking-wide">Upload Image</span>
-        </div>
+        {isOwner && (
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-full">
+            <span className="text-xs text-white font-medium tracking-wide">Upload Image</span>
+          </div>
+        )}
         <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={onUpload} />
       </div>
       <div>
@@ -313,48 +353,140 @@ function CircleSlot({ image, title, onUpload }: CircleSlotProps) {
 }
 
 export default function App() {
-  const [assets, setAssets] = useState(initialSvgAssets);
+  // 1. Core State: Loads edited assets out of device browser memory
+  const [assets, setAssets] = useState<typeof initialSvgAssets>(() => {
+    const saved = localStorage.getItem('stacy_portfolio_assets');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return initialSvgAssets;
+  });
 
-  // Helper utility to safely manage blob references and swap file slots
+  // 2. Permissions State: Defaults to false (client mode). Saved to local storage once unlocked.
+  const [isOwner, setIsOwner] = useState<boolean>(() => {
+    return localStorage.getItem('stacy_admin_auth') === 'true';
+  });
+
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [authPin, setAuthPin] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+
+  // Keep the page anchored at the top when the app loads.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Auto-sync image changes into local storage
+  useEffect(() => {
+    localStorage.setItem('stacy_portfolio_assets', JSON.stringify(assets));
+  }, [assets]);
+
+  // Handle PIN authentication logic
+  const handleAdminLogin = () => {
+    if (isOwner) {
+      localStorage.removeItem('stacy_admin_auth');
+      setIsOwner(false);
+      setShowAuthDialog(false);
+      setAuthPin('');
+      setAuthMessage('Logged out of Owner Mode. Viewing site as a client.');
+    } else {
+      setAuthMessage('');
+      setShowAuthDialog(true);
+    }
+  };
+
+  const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (authPin === '2026') {
+      localStorage.setItem('stacy_admin_auth', 'true');
+      setIsOwner(true);
+      setShowAuthDialog(false);
+      setAuthPin('');
+      setAuthMessage('Access granted. Welcome back, Stacy!');
+    } else {
+      setAuthMessage('Incorrect authorization code.');
+    }
+  };
+
+  // Convert uploaded assets to permanent Base64 strings
   const updateAsset = (slot: keyof typeof initialSvgAssets, file: File | null) => {
     if (!file) {
-      // Revert back to original initial fallback SVG asset
       setAssets(prev => ({ ...prev, [slot]: initialSvgAssets[slot] }));
       return;
     }
-    const localUrl = URL.createObjectURL(file);
-    setAssets(prev => {
-      // Clear old garbage collectable memory paths if necessary
-      if (prev[slot].startsWith('blob:')) URL.revokeObjectURL(prev[slot]);
-      return { ...prev, [slot]: localUrl };
-    });
-  };
-
-  // Clean memory garbage when app unmounts completely
-  useEffect(() => {
-    return () => {
-      Object.values(assets).forEach(url => {
-        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-      });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setAssets(prev => ({ ...prev, [slot]: base64String }));
     };
-  }, []);
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] font-sans text-zinc-800 antialiased selection:bg-[#6E7F6B]/10 selection:text-[#6E7F6B]">
       <ReadingProgressBar />
       
-      <Navbar logoUrl={assets.circle1.startsWith('data:') ? null : assets.circle1} onLogoUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} />
+      {/* Navbar with active permission hooks */}
+      <Navbar 
+        logoUrl={assets.circle1.startsWith('data:image/svg+xml') ? null : assets.circle1} 
+        onLogoUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} 
+        isOwner={isOwner}
+        onAdminLogin={handleAdminLogin}
+      />
+
+      {showAuthDialog && !isOwner && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-6 pt-24 backdrop-blur-[2px]">
+          <form
+            onSubmit={handleAuthSubmit}
+            className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-[#FBFBFA] p-6 shadow-xl"
+          >
+            <h2 className="font-serif text-xl font-bold tracking-tight text-zinc-900">Owner Access</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              Enter the editing PIN to unlock image uploads.
+            </p>
+            <input
+              autoFocus
+              type="password"
+              value={authPin}
+              onChange={(event) => setAuthPin(event.target.value)}
+              className="mt-4 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#6E7F6B]"
+              placeholder="PIN"
+            />
+            {authMessage && (
+              <p className="mt-3 text-sm text-zinc-500">{authMessage}</p>
+            )}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAuthDialog(false)}
+                className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="rounded-xl bg-[#6E7F6B] px-4 py-2 text-sm font-medium text-white"
+              >
+                Unlock
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
       
       <main>
-        {/* Full Interactive Hero Layer */}
         <Hero 
           heroUrl={assets.hero} 
           avatarUrl={assets.avatar} 
           onHeroUpload={(e) => updateAsset('hero', e.target.files?.[0] || null)}
           onAvatarUpload={(e) => updateAsset('avatar', e.target.files?.[0] || null)}
+          isOwner={isOwner}
         />
 
-        {/* Elegant Original Long-Form Literary Prose Pillar Container */}
         <article id="article" className="mx-auto max-w-3xl px-6 pb-24">
           <div className="prose prose-zinc mx-auto max-w-2xl">
             <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9 first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:font-serif first-letter:text-6xl first-letter:font-bold first-letter:leading-none first-letter:text-zinc-900 sm:first-letter:text-7xl">
@@ -373,8 +505,8 @@ export default function App() {
               The hierarchy stays disciplined. Serif headlines introduce tone and elegance, while the sans-serif body copy maintains clarity over long-form content. Micro-interactions are intentionally restrained, reserved for navigational states, progress indicators, and subtle link affordances.
             </p>
 
-            {/* Complete Reintegrated Dynamic Asymmetric Multi-Grid Slot Tree Panel */}
-            <EditorialGridStudio assets={assets} updateAsset={updateAsset} />
+            {/* Asymmetric Studio with layout blocking control */}
+            <EditorialGridStudio assets={assets} updateAsset={updateAsset} isOwner={isOwner} />
 
             <p className="mb-8 text-base leading-8 text-zinc-600 sm:text-lg sm:leading-9">
               Every breakpoint preserves the same editorial logic. The hero graphic compresses gracefully, the nav remains calm and sticky, and the body content retains its cadence without collapsing into a generic blog template. That consistency is what makes the interface feel authored.
@@ -384,18 +516,17 @@ export default function App() {
               The result is a single-page reading experience that feels premium, spatial, and precise, with a visual language that can support a designer’s article without competing with it.
             </p>
 
-            {/* Bottom Secondary Grid Fallback Storage Circles Section */}
+            {/* Accent Profile Submodules */}
             <section className="border-t border-zinc-200 pt-12">
               <h3 className="font-serif text-xl font-bold mb-6 text-zinc-900">Alternative Profile Accents</h3>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <CircleSlot image={assets.circle1} title="Accent Target Alpha" onUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} />
-                <CircleSlot image={assets.circle2} title="Accent Target Beta" onUpload={(e) => updateAsset('circle2', e.target.files?.[0] || null)} />
-                <CircleSlot image={assets.circle3} title="Accent Target Gamma" onUpload={(e) => updateAsset('circle3', e.target.files?.[0] || null)} />
+                <CircleSlot image={assets.circle1} title="Accent Target Alpha" onUpload={(e) => updateAsset('circle1', e.target.files?.[0] || null)} isOwner={isOwner} />
+                <CircleSlot image={assets.circle2} title="Accent Target Beta" onUpload={(e) => updateAsset('circle2', e.target.files?.[0] || null)} isOwner={isOwner} />
+                <CircleSlot image={assets.circle3} title="Accent Target Gamma" onUpload={(e) => updateAsset('circle3', e.target.files?.[0] || null)} isOwner={isOwner} />
               </div>
             </section>
           </div>
 
-          {/* Core Intact Design Notes Component */}
           <section id="notes" className="mx-auto mt-20 max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm">
             <h2 className="font-serif text-xl font-bold text-zinc-900 tracking-tight">Design Notes</h2>
             <ul className="mt-4 space-y-3 text-xs leading-6 text-zinc-500 sm:text-sm">
